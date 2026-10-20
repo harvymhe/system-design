@@ -13,12 +13,16 @@ from servidor import Servidor
 
 
 def simular_pico(servidor, cantidad, duracion):
-    # TODO: envia "cantidad" solicitudes seguidas, cada una con la
-    # "duracion" indicada, al mismo servidor, sin avanzar el reloj entre
-    # una y otra (llegan todas en el mismo segundo). Cuenta cuantas
-    # atendio el servidor y cuantas rechazo, y devuelve las dos cuentas
-    # como una tupla (atendidas, rechazadas).
-    raise NotImplementedError
+    atendidas = 0
+    rechazadas = 0
+
+    for _ in range(cantidad):
+        if servidor.atender(duracion):
+            atendidas += 1
+        else:
+            rechazadas += 1
+
+    return atendidas, rechazadas
 
 
 if __name__ == "__main__":

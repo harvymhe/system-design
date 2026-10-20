@@ -1,8 +1,8 @@
 """Ejercicio 3: balanceador de menos conexiones (least connections).
 
 Corre las pruebas con:
-
     pytest test_menos_conexiones_ejercicio3.py
+
 
 Las pruebas tambien usan tu BalanceadorRoundRobin del Ejercicio 2, para
 comparar los dos algoritmos con el mismo trafico.
@@ -14,9 +14,21 @@ class BalanceadorMenosConexiones:
         self.servidores = servidores
 
     def enviar(self, duracion):
-        # TODO: elige, entre los servidores sanos que todavia pueden
-        # atender, el que tiene menos conexiones activas en este momento.
-        # Si hay empate, gana el que aparece primero en la lista.
-        # Enviale la solicitud y devuelve su nombre. Si ningun servidor
-        # puede atenderla, devuelve None.
-        raise NotImplementedError
+        servidor_seleccionado = None
+
+        for servidor in self.servidores:
+            if not servidor.health_check() or not servidor.puede_atender():
+                continue
+
+            if (
+                servidor_seleccionado is None
+                or servidor.conexiones_activas()
+                < servidor_seleccionado.conexiones_activas()
+            ):
+                servidor_seleccionado = servidor
+
+        if servidor_seleccionado is not None:
+            servidor_seleccionado.atender(duracion)
+            return servidor_seleccionado.nombre
+
+        return None

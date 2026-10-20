@@ -2,7 +2,7 @@
 
 Corre las pruebas con:
 
-    pytest test_balanceador_ejercicio2.py
+    
 
 No cambies los nombres de la clase ni de los metodos: los tests
 dependen de que existan exactamente asi.
@@ -28,4 +28,16 @@ class BalanceadorRoundRobin:
         # Si un servidor acepto la solicitud, deja self.siguiente apuntando
         # al servidor que viene despues de el y devuelve servidor.nombre.
         # Si ninguno la acepto, devuelve None.
-        raise NotImplementedError
+        total = len(self.servidores)
+        if total == 0:
+            return None
+
+        for desplazamiento in range(total):
+            indice = (self.siguiente + desplazamiento) % total
+            servidor = self.servidores[indice]
+
+            if servidor.health_check() and servidor.atender(duracion):
+                self.siguiente = (indice + 1) % total
+                return servidor.nombre
+
+        return None

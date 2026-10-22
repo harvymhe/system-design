@@ -19,10 +19,16 @@ class ServicioDeReservasReplicado:
         self.siguiente_id = 1
 
     def cancha_disponible(self, campus, cancha, fecha, hora):
-        # TODO: devuelve True si ninguna reserva ocupa esa cancha, en ese
-        # campus, esa fecha y esa hora. Elige de que nodo leer: esta
-        # respuesta decide si se acepta una reserva nueva.
-        raise NotImplementedError
+        reservas = self.base.leer_de_primaria()
+        for reserva in reservas:
+            if (
+                reserva.campus == campus
+                and reserva.cancha == cancha
+                and reserva.fecha == fecha
+                and reserva.hora == hora
+            ):
+                return False
+        return True
 
     def reservar(self, id_estudiante, campus, cancha, fecha, hora):
         if not self.cancha_disponible(campus, cancha, fecha, hora):
@@ -33,13 +39,16 @@ class ServicioDeReservasReplicado:
         return reserva
 
     def mis_reservas(self, id_estudiante):
-        # TODO: devuelve las reservas de este estudiante. Lee de la replica
-        # siempre que puedas, para quitarle carga a la primaria, pero un
-        # estudiante que acaba de reservar tiene que ver su reserva aunque
-        # la replica todavia no la tenga (leer lo que uno mismo escribio).
-        raise NotImplementedError
+        if self.base.tiene_escrituras_pendientes_de(id_estudiante):
+            reservas = self.base.leer_de_primaria()
+        else:
+            reservas = self.base.leer_de_replica()
+        return [
+            reserva
+            for reserva in reservas
+            if reserva.id_estudiante == id_estudiante
+        ]
 
     def ocupacion_del_campus(self, campus):
-        # TODO: devuelve cuantas reservas tiene el campus. Es el reporte
-        # que mira la administracion una vez al dia: elige de que nodo leer.
-        raise NotImplementedError
+        reservas = self.base.leer_de_replica()
+        return sum(1 for reserva in reservas if reserva.campus == campus)

@@ -36,12 +36,12 @@ class ServicioConCola:
         self.cola = cola
 
     def reservar(self, estudiante, cancha, hora):
-        # TODO 1: igual que ServicioSincrono, pero sin tocar el correo. Si
-        # la hora esta libre, registra la reserva, publica en self.cola un
-        # mensaje con el cuerpo {"estudiante": ..., "cancha": ...,
-        # "hora": ...} y devuelve "confirmada". Si no esta libre, devuelve
-        # "ocupada" sin publicar nada.
-        raise NotImplementedError
+        if not self.repositorio.esta_libre(cancha, hora):
+            return "ocupada"
+        self.repositorio.registrar(estudiante, cancha, hora)
+        cuerpo = {"estudiante": estudiante, "cancha": cancha, "hora": hora}
+        self.cola.publicar(cuerpo)
+        return "confirmada"
 
 
 class TrabajadorDeCorreo:
@@ -54,7 +54,18 @@ class TrabajadorDeCorreo:
         # correo al estudiante del cuerpo, con asunto_de_confirmacion(cuerpo).
         # Si el envio salio bien, confirma el mensaje con su "id". Si fallo,
         # deja de procesar sin confirmarlo.
-        raise NotImplementedError
+        while True:
+            mensaje = self.cola.recibir()
+            if mensaje is None:
+                return
+
+            cuerpo = mensaje["cuerpo"]
+            enviado = self.correo.enviar(
+                cuerpo["estudiante"], asunto_de_confirmacion(cuerpo)
+            )
+            if not enviado:
+                return
+            self.cola.confirmar(mensaje["id"])
 
 
 if __name__ == "__main__":

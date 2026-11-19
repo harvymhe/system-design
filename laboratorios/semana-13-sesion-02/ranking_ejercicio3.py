@@ -38,4 +38,57 @@ Esta vez no hay codigo de partida. Corre las pruebas con:
 """
 
 from actividad import Publicacion
-# TODO: escribe aqui la clase OrdenadorDeFeed.
+
+
+class OrdenadorDeFeed:
+    def __init__(self, interacciones=None, equipos_de=None):
+        self.interacciones = interacciones or {}
+        self.equipos_de = equipos_de or {}
+
+    def puntaje(self, publicacion, estudiante, ahora):
+        interacciones = self.interacciones.get(publicacion.id, 0)
+        multiplicador = 3 if publicacion.autor in self.equipos_de.get(estudiante, []) else 1
+        horas = (ahora - publicacion.momento) // 60
+        return (interacciones + 1) * multiplicador / (1 + horas)
+
+    def ordenar(self, publicaciones, estudiante, ahora, cantidad):
+        pendientes = list(publicaciones)
+        resultado = []
+
+        while pendientes and len(resultado) < cantidad:
+            pendientes.sort(
+                key=lambda p: (
+                    -self.puntaje(p, estudiante, ahora),
+                    -p.momento,
+                    p.id,
+                )
+            )
+
+            siguiente = pendientes[0]
+            if (
+                len(resultado) >= 2
+                and resultado[-1].autor == resultado[-2].autor
+                and siguiente.autor == resultado[-1].autor
+            ):
+                alternativa = next(
+                    (p for p in pendientes if p.autor != siguiente.autor),
+                    None,
+                )
+                if alternativa is not None:
+                    siguiente = alternativa
+
+            pendientes.remove(siguiente)
+            resultado.append(siguiente)
+
+        return resultado
+
+    def espacios_mas_reservados(self, reservas, ahora, cantidad):
+        conteos = {}
+        inicio = ahora - 7 * 24 * 60
+
+        for espacio, momento in reservas:
+            if inicio < momento <= ahora:
+                conteos[espacio] = conteos.get(espacio, 0) + 1
+
+        ranking = sorted(conteos.items(), key=lambda item: (-item[1], item[0]))
+        return ranking[:cantidad]

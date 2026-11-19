@@ -32,11 +32,14 @@ class Canales:
         self.suscritos = {}
 
     def suscribir(self, tema, conexion):
+        if tema not in in self.suscritos:
+            self.suscritos[tema] = []
+        if not 
         # TODO 1: agrega la conexion a la lista del tema (creala si no
         # existe). Si ya estaba suscrita a ese tema, no la agregues otra
         # vez. Escribe tambien desuscribir(tema, conexion), que la quita
         # si esta.
-        raise NotImplementedError
+        
 
     def suscriptores(self, tema):
         return len(self.suscritos.get(tema, []))

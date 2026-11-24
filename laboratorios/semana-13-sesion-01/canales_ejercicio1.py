@@ -32,23 +32,24 @@ class Canales:
         self.suscritos = {}
 
     def suscribir(self, tema, conexion):
-        if tema not in in self.suscritos:
+        if tema not in self.suscritos:
             self.suscritos[tema] = []
-        if not 
-        # TODO 1: agrega la conexion a la lista del tema (creala si no
-        # existe). Si ya estaba suscrita a ese tema, no la agregues otra
-        # vez. Escribe tambien desuscribir(tema, conexion), que la quita
-        # si esta.
-        
+        if conexion not in self.suscritos[tema]:
+            self.suscritos[tema].append(conexion)
+
+    def desuscribir(self, tema, conexion):
+        if tema in self.suscritos and conexion in self.suscritos[tema]:
+            self.suscritos[tema].remove(conexion)
 
     def suscriptores(self, tema):
         return len(self.suscritos.get(tema, []))
 
     def publicar(self, tema, mensaje):
-        # TODO 2: envia el mensaje a cada conexion suscrita al tema y devuelve
-        # cuantas lo recibieron (enviar devuelve True o False). Un tema
-        # sin suscriptores devuelve 0.
-        raise NotImplementedError
+        entregados = 0
+        for conexion in self.suscritos.get(tema, []):
+            if conexion.enviar(mensaje):
+                entregados += 1
+        return entregados
 
 
 class PublicadorDeDisponibilidad(ObservadorDeReservas):
@@ -57,10 +58,13 @@ class PublicadorDeDisponibilidad(ObservadorDeReservas):
         self.fecha = fecha
         self.ultimos_entregados = 0
 
-    # TODO 3: al_ocuparse publica "ocupada 18-19" en el tema de esa cancha y
-    # fecha (tema_de), y al_liberarse publica "libre 18-19", con las horas
-    # de la franja. Guarda en self.ultimos_entregados lo que devolvio
-    # publicar.
+    def al_ocuparse(self, cancha, franja):
+        mensaje = f"ocupada {franja.inicio}-{franja.fin}"
+        self.ultimos_entregados = self.canales.publicar(tema_de(cancha, self.fecha), mensaje)
+
+    def al_liberarse(self, cancha, franja):
+        mensaje = f"libre {franja.inicio}-{franja.fin}"
+        self.ultimos_entregados = self.canales.publicar(tema_de(cancha, self.fecha), mensaje)
 
 
 if __name__ == "__main__":

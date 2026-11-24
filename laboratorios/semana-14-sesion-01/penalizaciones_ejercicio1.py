@@ -25,3 +25,30 @@ Corre las pruebas con:
 
     pytest test_penalizaciones_ejercicio1.py
 """
+
+def puntos_por_cancelar(minutos: int):
+    if minutos >= 1440:
+        return 0
+    if minutos >= 120:
+        return 1
+    return 2
+
+
+class HistorialDePenalizaciones:
+    def __init__(self):
+        self._puntos = {}
+
+    def _sumar(self, estudiante, puntos):
+        self._puntos[estudiante] = self.puntos_de(estudiante) + puntos
+
+    def cancelar(self, estudiante, minutos):
+        self._sumar(estudiante, puntos_por_cancelar(minutos))
+
+    def no_presentarse(self, estudiante):
+        self._sumar(estudiante, 3)
+
+    def esta_bloqueado(self, estudiante):
+        return self.puntos_de(estudiante) >= 3
+
+    def puntos_de(self, estudiante):
+        return self._puntos.get(estudiante, 0)
